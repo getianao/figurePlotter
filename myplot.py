@@ -9,14 +9,18 @@ import seaborn as sns
 
 
 def bar(apps, configs, values, ylabel: str, 
-        filename=None, groups=True, title=None, plotSize=(16, 4),
-        palette=sns.color_palette("mako", 20),
-        edgecolor=None, showXAxis=True, legendPosition='best'):
+        filename=None, groups=True, title=None, plotSize=(16, 4), ylim = None, 
+        plotAverage=True, labelAverage=True, averageXlabel = "Mean", averageFunc=np.mean, decimals=1,
+        colorPalette=sns.color_palette("mako", 25), 
+        edgecolor="black", showXAxis=True, legendPosition='best'):
    maxHeight = float('-inf')
    minHeight = float('inf')
    opacity = 0.75
+   
    fig, ax = plt.subplots(figsize=plotSize)
+   
    apps_index = np.arange(len(apps))
+   # print(apps_index)
 
    if groups:
       width = 1.0/(len(apps)+1.0)
@@ -28,74 +32,73 @@ def bar(apps, configs, values, ylabel: str,
       maxHeight = max(maxHeight, max(ys))
       minHeight = min(minHeight, min(ys))
       plt.bar(apps_index+configId*width, ys, width,
-              alpha=opacity, color=palette[configId],
-              edgecolor=(edgecolor if edgecolor else palette[configId]),
+              alpha=opacity, color=colorPalette[configId],
+              edgecolor=(edgecolor if edgecolor else colorPalette[configId]),
+              linewidth=0.01,
               label=configs[configId])
-#          if plotAverage:
-#             plt.bar([len(entries)], [summary(ys)], width*1.25,
-#                  alpha=min(opacity*1.20, 1.0),
-#                     color=palette[idx], edgecolor=(edgecolor if edgecolor else palette[idx]))
-#             height = summary(ys)
-
-#             avg = np.round(summary(ys), decimals=decimals)
-#             if decimals == 0:
-#                avg = int(avg)
-#             label = str(avg)
-#             if labelAverage:
-#                plt.text(len(entries), height, label, fontsize=12,
-#                         ha='center', va='bottom', rotation=90)
-
-#          if plotAverage:
-#             plt.axvline((len(entries)-1) + width, color='grey',
-#                         linestyle='dashed', linewidth=1)
-
-
-
+      if plotAverage:
+         plt.bar(np.array([len(apps)])+configId*width, [averageFunc(ys)], width*1.25,
+                 alpha=min(opacity*1.20, 1.0), color=colorPalette[configId],
+                 edgecolor=(edgecolor if edgecolor else colorPalette[configId]))
+         plt.axvline((len(apps)) - width/2.0, color='grey',  linestyle='dashed', linewidth=1)
+         
+         height = averageFunc(ys) + 0.1
+         # print(ys)
+         if ylim is not None and height > ylim[1]:
+            height = ylim[1]+0.1
+         avg = np.round(averageFunc(ys), decimals=decimals)
+         label = format(avg, "."+str(decimals)+"f")
+         # print(ys, averageFunc(ys))
+         if labelAverage:
+            plt.text(np.array([len(apps)])+configId*width, height, label, fontsize=5,
+                     ha='center', va='bottom', rotation=90)
 
    box = ax.get_position()
    ax.set_position([box.x0, box.y0*1.5, box.width, box.height])
    ax.yaxis.grid(True)  # horizontal grid
    ax.xaxis.grid(False)  # horizontal grid
-   if minHeight >= 0:
-      plt.ylim(0, maxHeight*1.1)
+   
+   ax.set_yscale('log', base=2)
+   ax.set_yticks([0.2, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
+   if ylim is not None:
+      plt.ylim(ylim[0], ylim[1])
+      # plt.ylim(0, 10.5)
+      # plt.ylim(-1, 6.25)
    else:
-      plt.ylim(minHeight*1.1, maxHeight*1.1)
-#    #plt.ylim(0, 10.5)
-#    #plt.ylim(-1, 6.25)
+      if minHeight >= 0:
+         plt.ylim(0, maxHeight*1.1)
+      else:
+         plt.ylim(minHeight*1.1, maxHeight*1.1)
 
    plt.ylabel(ylabel, fontsize=14)
 
-#    if plotAverage:
-#       entries.append('Mean')
-#       apps_index = np.arange(len(entries), dtype=float)
-#       #apps_index[len(entries)-1] += width*len(groups)*0.5
-
-   
+   # ticks
    if groups:
       if showXAxis:
+         if plotAverage:
+            apps.append(averageXlabel)
+            apps_index = np.arange(len(apps))
          plt.xticks(apps_index + (len(configs)-1)*width*0.5,
-                    apps, rotation=90, ha='center', fontsize=12)
+                    apps, rotation=60, ha='center', fontsize=12)
       else:
          plt.xticks([], [])
          #plt.xticks(apps_index + (len(groups)-1)*width*0.5, entries, rotation=30, ha='right')
-      #plt.legend(loc='lower right',fontsize=14)
-      #plt.legend(loc='upper left',fontsize=14)
-      #plt.legend(loc=legendPosition,fontsize=14, ncol=3)
-      # plt.legend(loc=legendPosition, fontsize=14)
-      # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=14)
-      plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.25),
-                 ncol=7, fontsize=12)
-      #plt.legend(loc='best',fontsize=10)
    else:
       if showXAxis:
          plt.xticks(apps_index, entries, rotation=30, ha='right')
       else:
          plt.xticks([], [])
 
-#    #plt.yticks([-20,-15,-10,-5,0,5,10,15,20])
-#    #plt.yticks([-10,-5,0,5,10,15,20,25,30,35,40,45,50,55,60,65,70])
-#    #plt.yticks([-1,0,1,2,3,4,5,6])
 
+   # legend
+   # plt.legend(loc='lower right',fontsize=14)
+   # plt.legend(loc='upper left',fontsize=14)
+   # plt.legend(loc=legendPosition,fontsize=14, ncol=3)
+   # plt.legend(loc=legendPosition, fontsize=14)
+   # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=14)
+   plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.3),
+               ncol=7, fontsize=12)
+   #plt.legend(loc='best',fontsize=10)
    
    if title:
       plt.title(title)
