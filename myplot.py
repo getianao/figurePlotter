@@ -9,8 +9,9 @@ import seaborn as sns
 
 
 def bar(apps, configs, values, ylabel: str, 
-        filename=None, groups=True, groupsInterval = 0.10, title=None, plotSize=(16, 4), ylim = None, 
+        filename=None, groups=True, groupsInterval = 0.10, title=None, plotSize=(16, 4), 
         plotAverage=True, labelAverage=True, averageXlabel = "Mean", averageFunc=np.mean, decimals=1,
+        yscale = None, ylim = None, 
         colorPalette=sns.color_palette("mako", 25), 
         edgecolor="black", showXAxis=True, legendPosition='best'):
    averageHeightDict = {}
@@ -59,21 +60,21 @@ def bar(apps, configs, values, ylabel: str,
    ax.yaxis.grid(True)  # horizontal grid
    ax.xaxis.grid(False)  # horizontal grid
    
-   ax.set_yscale('log', base=2)
-   ax.set_yticks([0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
-   formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
-   # formatter.set_scientific(True) 
-   # formatter.set_powerlimits((0,8)) 
-   ax.yaxis.set_major_formatter(formatter)
-   # if ylim is not None:
-   #    plt.ylim(ylim[0], ylim[1])
-   #    # plt.ylim(0, 10.5)
-   #    # plt.ylim(-1, 6.25)
-   # else:
-   #    if minHeight >= 0:
-   #       plt.ylim(0, maxHeight*1.1)
-   #    else:
-   #       plt.ylim(minHeight*1.1, maxHeight*1.1)
+   if yscale == "log":
+      ax.set_yscale('log', base=2)
+      ax.set_yticks([0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
+      formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
+      ax.yaxis.set_major_formatter(formatter)
+   else:
+      if ylim is not None:
+         plt.ylim(ylim[0], ylim[1])
+         # plt.ylim(0, 10.5)
+         # plt.ylim(-1, 6.25)
+      else:
+         if minHeight >= 0:
+            plt.ylim(0, maxHeight*1.1)
+         else:
+            plt.ylim(minHeight*1.1, maxHeight*1.1)
 
    plt.ylabel(ylabel, fontsize=14)
 
