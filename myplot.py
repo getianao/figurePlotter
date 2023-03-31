@@ -36,6 +36,8 @@ def bar(apps, configs, values, ylabel: str,
       
       if colorHatch is not None:
          hatch = colorHatch[configId]
+      else:
+         hatch = None
       plt.bar(apps_index+configId*width, ys, width,
               alpha=opacity, color=colorPalette[configId],
               edgecolor=(edgecolor if edgecolor else colorPalette[configId]),
@@ -108,7 +110,7 @@ def bar(apps, configs, values, ylabel: str,
    # plt.legend(loc=legendPosition,fontsize=14, ncol=3)
    # plt.legend(loc=legendPosition, fontsize=14)
    # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=14)
-   plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.2),
+   plt.legend(loc='lower center', bbox_to_anchor=(0.5, 1.2),
                ncol=7, fontsize=fontSize)
    # plt.legend(loc='best',fontsize=12)
    

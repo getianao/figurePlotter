@@ -1,5 +1,22 @@
 import pandas as pd
 
+def merge_columns(data, configs_groups, configs_groups_names):
+  assert(len(configs_groups) == len(configs_groups_names))
+  column_names = data.keys().values.tolist()
+  for i in range(0, len(configs_groups)):
+    data_selected_keys = []
+    print("configs_groups[i]:", configs_groups[i])
+    for keyword in configs_groups[i]:
+      for column_name in column_names:
+        if(keyword in column_name):
+          data_selected_keys.append(column_name)
+          break
+    print(data_selected_keys)
+    assert(len(data_selected_keys) <= len(configs_groups[i]))
+    data[configs_groups_names[i]] = data[data_selected_keys].max(axis=1)
+  return data
+
+
 def exclude_and_sort_data(data, row_dict, column_dict):
   # sort by column name
   # add order-row
