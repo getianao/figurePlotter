@@ -128,3 +128,85 @@ def bar(apps, configs, values, ylabel: str,
    print("maxHeight", "%.2f" % maxHeight)
    print("minHeight", "%.2f" % minHeight)
    print("averageHeightDict", averageHeightDict)
+   
+def line(apps, configs, values, ylabel: str, only_average=False,  only_average_label = None,
+        filename=None, groups=True, groupsInterval = 0.10, title=None, plotSize=(16, 4), 
+        plotAverage=True, labelAverage=True, averageXlabel = "Mean", averageFunc=np.mean, decimals=1, fontSize = 14,
+        yscale = None, ylim = None, 
+        colorPalette=sns.color_palette("mako", 25),  colorHatch=None, 
+        edgecolor="black", showXAxis=True, legendPosition='best', plotConfig = None):
+   averageHeightDict = {}
+   maxHeight = float('-inf')
+   minHeight = float('inf')
+   opacity = 0.75
+   
+   fig, ax = plt.subplots(figsize=plotSize)
+   
+   apps_index = np.arange(len(apps))
+   # print(apps_index)
+
+   if groups:
+      width = (1.0 - groupsInterval)/(len(configs))
+   else:
+      width = 0.5
+
+   if only_average:
+      y_list = []
+      for configId in range(len(configs)):
+         ys = values[:, configId].astype('float')
+         maxHeight = max(maxHeight, averageFunc(ys))
+         minHeight = min(minHeight, averageFunc(ys))
+         y_list.append(averageFunc(ys))
+      assert(len(configs) == len(y_list))
+      plt.plot(configs, y_list, 'o-', color = 'g', label=only_average_label)
+         
+   box = ax.get_position()
+   ax.set_position([box.x0, box.y0*1.5, box.width, box.height])
+   ax.yaxis.grid(True)  # horizontal grid
+   ax.xaxis.grid(False)  # horizontal grid
+   
+   if yscale == "log":
+      ax.set_yscale('log', base=2)
+      ax.set_yticks([0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
+      formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
+      ax.yaxis.set_major_formatter(formatter)
+   else:
+      if ylim is not None:
+         plt.ylim(ylim[0], ylim[1])
+         # plt.ylim(0, 10.5)
+         # plt.ylim(-1, 6.25)
+      else:
+         if minHeight >= 0:
+            plt.ylim(0, maxHeight*1.1)
+         else:
+            plt.ylim(minHeight*1.1, maxHeight*1.1)
+
+   plt.ylabel(ylabel, fontsize=fontSize)    
+   # plt.margins(x=0.01)
+
+
+   # legend
+   # plt.legend(loc='lower right',fontsize=14)
+   # plt.legend(loc='upper left',fontsize=14)
+   # plt.legend(loc=legendPosition,fontsize=14, ncol=3)
+   # plt.legend(loc=legendPosition, fontsize=14)
+   # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize=14)
+   plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.2),
+               ncol=7, fontsize=fontSize)
+   # plt.legend(loc='best',fontsize=12)
+   
+   if title:
+      plt.title(title)
+
+   #plt.tight_layout()
+   if filename:
+      plt.savefig(filename, format="pdf", bbox_inches="tight")
+   else:
+      plt.show()
+   plt.clf()
+   plt.close('all')
+   
+   print("maxHeight", "%.2f" % maxHeight)
+   print("minHeight", "%.2f" % minHeight)
+   print("averageHeightDict", averageHeightDict)
+      

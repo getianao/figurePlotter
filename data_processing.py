@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def merge_columns(data, configs_groups, configs_groups_names):
   assert(len(configs_groups) == len(configs_groups_names))
@@ -87,3 +88,11 @@ def rename_data(data, row_dict, column_dict):
       new_row_name_dict[old_row_name] = new_row_name
     data = data.rename(index=new_row_name_dict)
   return data
+
+def geo_mean(input_list):
+    cleaned_input = [x for x in input_list if str(x) != 'nan']
+    if len(cleaned_input) < len(input_list):
+      print("WARNING: geo_mean: NaN in data")
+    assert(len(cleaned_input) > 0)
+    a = np.log(cleaned_input)
+    return np.exp(a.mean())
