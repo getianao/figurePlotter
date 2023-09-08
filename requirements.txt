@@ -1,0 +1,5 @@
+adjustText @ git+https://github.com/Phlya/adjustText@6f01dc4784d049f2d5927c3b1a910910aa674c5d
+pandas
+numpy
+matplotlib
+seaborn
