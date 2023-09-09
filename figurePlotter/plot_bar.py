@@ -86,9 +86,9 @@ def bar(
                 linewidth=1,
                 hatch=hatch,
             )
-            height = averageConfig["averageFunc"](ys) + xyConfig["xylim"][1] * 0.03
-            if xyConfig["xylim"][1] is not None and height > xyConfig["xylim"][1]:
-                height = xyConfig["xylim"][1] + 0.1
+            height = averageConfig["averageFunc"](ys) + xyConfig["ylim"][1] * 0.03
+            if xyConfig["ylim"][1] is not None and height > xyConfig["ylim"][1]:
+                height = xyConfig["ylim"][1] + 0.1
             label = format(
                 np.round(averageConfig["averageFunc"](ys), decimals=decimals),
                 "." + str(decimals) + "f",
@@ -127,7 +127,7 @@ def bar(
             )
             # For the bar higer than ylim[1], put the label on the top of the bar.
             if xyConfig["labelExceedYlim"]:
-                mask_list = [1 if x > xyConfig["xylim"][1] else 0 for x in ys]
+                mask_list = [1 if x > xyConfig["ylim"][1] else 0 for x in ys]
                 yss = np.multiply(mask_list, ys)
                 xss = np.multiply(mask_list, apps_index + configId * width)
                 for mask_bit_id in range(len(mask_list)):
@@ -140,7 +140,7 @@ def bar(
                         adjust_tests.append(
                             plt.text(
                                 xss[mask_bit_id],
-                                xyConfig["xylim"][1] + 0.1,
+                                xyConfig["ylim"][1] + 0.1,
                                 yss_label,
                                 fontsize=fontSize - 4,
                                 ha="center",
@@ -205,7 +205,7 @@ def bar(
     #     ax.yaxis.set_major_formatter(formatter)
     # else:
 
-    # xylim
+    # ylim
     if xyConfig["ylim"][0] is not None and xyConfig["ylim"][1] is not None:
         plt.ylim(xyConfig["ylim"][0], xyConfig["ylim"][1])
     else:
