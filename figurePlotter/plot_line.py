@@ -17,6 +17,7 @@ def line(
     configs,
     values,
     ylabel: str,
+    xlabel: str,
     only_average=False,
     only_average_label=None,
     filename=None,
@@ -41,11 +42,19 @@ def line(
     },
     legendPositionOffset=(0.45, 1),
     yMultipleLocator=None,
-    colorPalette=sns.color_palette("mako", 25),
+    colorPalette=[
+        "#f6c143",
+        "#7eaa55",
+        "#4d73be",
+        "#ae8dca",
+        "#2bdddd",
+        "#df8244",
+    ],
     colorHatch=None,
     edgecolor="black",
     showXAxis=True,
     markerPalette=["o-", "s-", "^-", "v-", "+-", "x-", "*-"],
+    labelAllY =False,
 ):
     averageHeightDict = {}
     maxHeight = float("-inf")
@@ -87,11 +96,24 @@ def line(
                 (apps_index + 1)[valueMask],
                 ys[valueMask],
                 markerPalette[configId],
-                linewidth=1,
-                markersize=4,
+                linewidth=2,
+                markersize=8,
                 color=colorPalette[configId],
                 label=configs[configId],
             )
+            if labelAllY:
+                for i in range(len(ys)):
+                    plt.text(
+                        apps_index[i] + 1,
+                        ys[i] + (ylim[1] if ylim else maxHeight) * 0.03,
+                        format(np.round(ys[i], decimals=decimals), "." + str(decimals) + "f"),
+                        fontsize=fontSize,
+                        ha="center",
+                        va="bottom",
+                        rotation=0,
+                        weight="bold",
+                    )
+            
 
             # plt.bar(apps_index+configId*width, ys, width,
             #    alpha=opacity, color=colorPalette[configId],
@@ -104,10 +126,14 @@ def line(
     ax.xaxis.grid(False)  # horizontal grid
 
     if yscale == "log":
-        ax.set_yscale("log", base=2)
-        ax.set_yticks([0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
-        formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
-        ax.yaxis.set_major_formatter(formatter)
+        ax.set_yscale('log', base=2)
+        # ax.set_yticks([1, 100, 10000], minor=False)
+        # formatter = matplotlib.ticker.LogFormatter(base=base, labelOnlyBase=False)
+        # ax.set_yscale("log", base=2)
+        # ax.set_yticks([1, 8, 64, 512, 4096, 32768], minor=False)
+        # formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
+        
+        # ax.yaxis.set_major_formatter(formatter)
     else:
         if ylim is not None:
             plt.ylim(ylim[0], ylim[1])
@@ -124,12 +150,21 @@ def line(
     ax.yaxis.get_ticklocs(minor=True)
     ax.yaxis.set_tick_params(which="minor", bottom=False)
     ax.minorticks_on()
-    plt.xticks(range(0, 21, 5), fontsize=fontSize - 2, weight="bold")
+    # plt.xticks(range(0, 6), fontsize=fontSize - 2, weight="bold")
+    plt.xticks(
+        apps_index + 1,
+        apps,
+        rotation=0,
+        ha="center",
+        fontsize=fontSize,
+        weight="bold",
+    )
 
     plt.ylabel(ylabel, fontsize=fontSize, weight="bold")
-    plt.xlabel("Application Idx", fontsize=fontSize - 2, weight="bold")
-    # plt.margins(x=0.01)
+    plt.xlabel(xlabel, fontsize=fontSize - 2, weight="bold")
+    plt.margins(x=0.15)
     # plt.margins(x=0)
+    
 
     # legend
     if legendConfig is not None:
@@ -166,6 +201,7 @@ def line(
     # plt.tight_layout()
     if filename:
         plt.savefig(filename, format="pdf", bbox_inches="tight")
+        print(f"Saved to {filename}")
     else:
         plt.show()
     plt.clf()

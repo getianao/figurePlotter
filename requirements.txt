@@ -1,4 +1,4 @@
-adjustText @ git+https://github.com/Phlya/adjustText@6f01dc4784d049f2d5927c3b1a910910aa674c5d
+adjustText @ git+https://github.com/Phlya/adjustText@42d25538be64d15ffaeee02d5463a09d33646564
 pandas
 numpy
 matplotlib

@@ -9,6 +9,8 @@ import numpy as np
 import seaborn as sns
 from adjustText import adjust_text
 
+from .data_processing import geo_mean
+
 
 def bar(
     apps,  # xaixs
@@ -24,6 +26,7 @@ def bar(
         "xlim": [None, None],
         "ylim": [None, None],
         "labelExceedYlim": False,
+        "labelAllY": False,
         "xyscale": [None, None],
         "showxyTicksLabel": [True, True],
         "xyticksRotation": [30, 0],
@@ -33,13 +36,13 @@ def bar(
         "plotAverage": True,
         "onlyAverage": False,
         "labelAverage": True,
-        "xlabel": "Mean",
-        "averageFunc": np.mean,
+        "xlabel": "Gmean",
+        "averageFunc": geo_mean,
     },
     plotNormalizedLine=True,
     legendConfig={
         "position": "best",
-        "positionOffset": (0.45, 1),
+        # "positionOffset": (0.45, 1),
         "col": 10,
         "legend.columnspacing": 1,
         "legend.handlelength": 2,
@@ -47,7 +50,18 @@ def bar(
     },
     decimals=1,
     fontSize=12,
-    colorPalette=sns.color_palette("mako", 25),
+    colorPalette=[
+        "#ffdc6d",
+        "#a0cc82",
+        "#4c95cb",
+        "#f19b61",
+        "#ae8dca",
+        "#c1c1c1",
+        "#93bfcf",
+        "#3fcfad",
+        "#f9d4d4",
+        "#f2f2f2",
+    ],
     colorHatch=None,
     edgecolor="black",
 ):
@@ -125,6 +139,20 @@ def bar(
                 label=configs[configId],
                 hatch=hatch,
             )
+            if xyConfig["labelAllY"]:
+                for i in range(len(ys)):
+                    plt.text(
+                        apps_index[i] + configId * width,
+                        ys[i] + xyConfig["ylim"][1] * 0.03,
+                        format(np.round(ys[i], decimals=decimals), "." + str(decimals) + "f"),
+                        fontsize=fontSize,
+                        ha="center",
+                        va="bottom",
+                        rotation=0,
+                        weight="bold",
+                    )
+
+                
             # For the bar higer than ylim[1], put the label on the top of the bar.
             if xyConfig["labelExceedYlim"]:
                 mask_list = [1 if x > xyConfig["ylim"][1] else 0 for x in ys]
@@ -198,11 +226,10 @@ def bar(
     if plotNormalizedLine:
         plt.axhline(1, color="red", linestyle="dashed", linewidth=1)
 
-    # if yscale == "log":
-    #     ax.set_yscale("log", base=2)
-    #     ax.set_yticks([0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128], minor=False)
-    #     formatter = matplotlib.ticker.LogFormatter(base=2, labelOnlyBase=False)
-    #     ax.yaxis.set_major_formatter(formatter)
+    if xyConfig["xyscale"][1] == "log":
+        ax.set_yscale("log")
+        ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, subs=(1.0,), numticks=10))
+        ax.set_yticks([0.1, 1, 10, 100, 1000, 10000])
     # else:
 
     # ylim
@@ -276,7 +303,7 @@ def bar(
         frameon=False,
         prop={"weight": "bold"},
     )
-
+    print("adjust_texts", adjust_tests)
     adjust_text(
         adjust_tests,
         ensure_inside_axes=False,
@@ -304,6 +331,7 @@ def bar(
     # plt.tight_layout()
     if filename:
         plt.savefig(filename, format="pdf", bbox_inches="tight")
+        print(f"Saved to {filename}")
     else:
         plt.show()
     plt.clf()
