@@ -31,6 +31,7 @@ def bar(
         "showxyTicksLabel": [True, True],
         "xyticksRotation": [30, 0],
         "xyticksMajorLocator": [None, None],
+        "yticksLabel": None
     },
     averageConfig={
         "plotAverage": True,
@@ -50,6 +51,7 @@ def bar(
     },
     decimals=1,
     fontSize=12,
+    avgTextFontSize=12,
     colorPalette=[
         "#ffdc6d",
         "#a0cc82",
@@ -100,7 +102,10 @@ def bar(
                 linewidth=1,
                 hatch=hatch,
             )
-            height = averageConfig["averageFunc"](ys) + xyConfig["ylim"][1] * 0.03
+            if xyConfig["xyscale"][1] == "log":
+                height = averageConfig["averageFunc"](ys) + xyConfig["ylim"][1] * 0.03
+            else:
+                height = averageConfig["averageFunc"](ys) * 1.03
             if xyConfig["ylim"][1] is not None and height > xyConfig["ylim"][1]:
                 height = xyConfig["ylim"][1] + 0.1
             label = format(
@@ -152,7 +157,6 @@ def bar(
                         weight="bold",
                     )
 
-                
             # For the bar higer than ylim[1], put the label on the top of the bar.
             if xyConfig["labelExceedYlim"]:
                 mask_list = [1 if x > xyConfig["ylim"][1] else 0 for x in ys]
@@ -194,7 +198,10 @@ def bar(
                     linewidth=1,
                     hatch=hatch,
                 )
-                averageTextHeight = averageConfig["averageFunc"](ys) + 0.2
+                if xyConfig["xyscale"][1] == "log":
+                    averageTextHeight = averageConfig["averageFunc"](ys) + xyConfig["ylim"][1] * 0.01
+                else:
+                    averageTextHeight = averageConfig["averageFunc"](ys) * 1.1
                 if (
                     xyConfig["ylim"][1] is not None
                     and averageTextHeight > xyConfig["ylim"][1]
@@ -210,7 +217,7 @@ def bar(
                         np.array([len(apps) + width]) + configId * width,
                         averageTextHeight,
                         averageText,
-                        fontsize=fontSize - 5,
+                        fontsize=avgTextFontSize,
                         ha="center",
                         va="bottom",
                         rotation=90,
@@ -229,7 +236,8 @@ def bar(
     if xyConfig["xyscale"][1] == "log":
         ax.set_yscale("log")
         ax.yaxis.set_major_locator(matplotlib.ticker.LogLocator(base=10.0, subs=(1.0,), numticks=10))
-        ax.set_yticks([0.1, 1, 10, 100, 1000, 10000])
+        if "yticksLabel" in xyConfig and xyConfig["yticksLabel"] is not None:
+            ax.set_yticks(xyConfig["yticksLabel"])
     # else:
 
     # ylim
@@ -291,7 +299,6 @@ def bar(
 
         # plt.margins(x=0.01)
 
-    # legend
     plt.rcParams["legend.columnspacing"] = legendConfig["legend.columnspacing"]
     plt.rcParams["legend.handlelength"] = legendConfig["legend.handlelength"]
     plt.rcParams["legend.handletextpad"] = legendConfig["legend.handletextpad"]
@@ -303,6 +310,35 @@ def bar(
         frameon=False,
         prop={"weight": "bold"},
     )
+    if "random" in filename:
+        if True:
+            handles, labels = ax.get_legend_handles_labels()
+            # 第一行 legend（baseline）
+            plt.rcParams["legend.columnspacing"] = 4
+            leg1 = ax.legend(
+                [handles[0], handles[1], handles[2]],
+                [labels[0], labels[1], labels[2]],
+                ncol=3,
+                loc=legendConfig["position"],
+                bbox_to_anchor=(legendConfig["positionOffset"][0], legendConfig["positionOffset"][1]+0.0845),
+                fontsize=fontSize,
+                frameon=False,
+                prop={"weight": "bold"},
+            )
+            plt.rcParams["legend.columnspacing"] = legendConfig["legend.columnspacing"]
+            leg2 = ax.legend(
+                [handles[3], handles[4], handles[5], handles[6]],
+                [labels[3], labels[4], labels[5], labels[6]],
+                ncol=4,
+                loc=legendConfig["position"],
+                bbox_to_anchor=(legendConfig["positionOffset"][0], legendConfig["positionOffset"][1]-0.02),
+                fontsize=fontSize,
+                frameon=False,
+                prop={"weight": "bold"},
+            )
+            ax.add_artist(leg1)
+            # ax.add_artist(leg2)
+
     print("adjust_texts", adjust_tests)
     adjust_text(
         adjust_tests,
